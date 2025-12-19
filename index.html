@@ -154,6 +154,8 @@
             "mais": { name: "Maïs", icon: "🌽", color: "#f6ad55" },
             "bois": { name: "Bois", icon: "🪵", color: "#c05621" },
             "dechets": { name: "Déchets", icon: "🗑️", color: "#718096" },
+            "humain": { name: "Humain", icon: "🧑", color: "#fbd38d" },
+            "terre": { name: "Terre", icon: "🌍", color: "#795548" },
 
             // --- NIVEAU 1 : Transformés ---
             "amidon": { name: "Amidon", icon: "🍚", color: "#fff5f5" },
@@ -184,6 +186,7 @@
 
         const recipes = [
             // --- TRANSFORMATIONS BASE ---
+            { a: "humain", b: "terre", result: "mais" },
             // Maïs
             { a: "mais", b: "eau", result: "amidon" },
             { a: "mais", b: "microbe", result: "bioethanol" }, // Fermentation
@@ -224,7 +227,7 @@
         ];
 
         // On garde les découvertes de base
-        let discovered = ["eau", "energie", "microbe", "mais", "bois", "dechets"];
+        let discovered = ["eau", "energie", "microbe", "humain", "bois", "dechets"];
 
         // --- 2. ENGINE ---
 
