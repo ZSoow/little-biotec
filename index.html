@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>My Little Biotec - Beta 0.2</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #f0f4f8;
+            overflow: hidden;
+        }
+
+        /* --- ZONES --- */
+        #workspace {
+            flex-grow: 1;
+            position: relative;
+            background-image: radial-gradient(#cbd5e0 2px, transparent 2px);
+            background-size: 25px 25px;
+            background-color: #ffffff;
+        }
+
+        #sidebar {
+            width: 320px;
+            background-color: #2d3748;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            z-index: 20;
+        }
+
+        h2 { margin-top: 0; text-align: center; color: #a0aec0; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* --- ÉLÉMENTS --- */
+        .element {
+            width: 80px;
+            height: 80px;
+            background-color: white;
+            border: 3px solid #cbd5e0;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: absolute;
+            font-size: 28px;
+            z-index: 10;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .element span {
+            font-size: 11px;
+            margin-top: 4px;
+            color: #4a5568;
+            font-weight: 700;
+            text-align: center;
+            line-height: 1;
+            pointer-events: none;
+            width: 90%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Styles Sidebar */
+        #library {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 10px;
+            padding-top: 10px;
+        }
+
+        .element-source {
+            width: 70px;
+            height: 70px;
+            background-color: #4a5568;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #e2e8f0;
+            font-size: 24px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        
+        .element-source:hover { background-color: #718096; transform: translateY(-2px); }
+        .element-source span { font-size: 10px; margin-top: 5px; text-align: center; }
+
+        /* --- UI UTILS --- */
+        #trash {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #feb2b2;
+            color: #c53030;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            border: 2px dashed #c53030;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        #trash.active { opacity: 1; transform: scale(1.1); }
+
+        /* Animation de découverte */
+        @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .new-discovery { animation: pop 0.5s ease-out; box-shadow: 0 0 20px #f6e05e; border-color: #f6e05e !important; }
+    </style>
+</head>
+<body>
+
+    <div id="workspace">
+        <div id="trash">🗑️</div>
+    </div>
+
+    <div id="sidebar">
+        <h2>Laboratoire</h2>
+        <div id="library"></div>
+    </div>
+
+    <script>
+        // --- 1. DATA (Biotech Edition) ---
+        
+        const elementsDB = {
+            // Éléments de Base (Disponibles dès le début)
+            "eau": { name: "Eau", icon: "💧", color: "#63b3ed" },
+            "energie": { name: "Énergie", icon: "⚡", color: "#f6e05e" },
+            "microbe": { name: "Microbes", icon: "🦠", color: "#9f7aea" },
+            "mais": { name: "Maïs", icon: "🌽", color: "#f6ad55" },
+            "bois": { name: "Bois", icon: "🪵", color: "#c05621" },
+            "dechets": { name: "Déchets", icon: "🗑️", color: "#718096" },
+
+            // Niveau 1 (Premières transformations)
+            "amidon": { name: "Amidon", icon: "🍚", color: "#fff5f5" },
+            "cellulose": { name: "Cellulose", icon: "📄", color: "#fc8181" },
+            "compost": { name: "Compost", icon: "💩", color: "#48bb78" },
+            "biogaz": { name: "Biogaz", icon: "💨", color: "#81e6d9" },
+            "biochar": { name: "Biochar", icon: "⚫", color: "#2d3748" },
+
+            // Niveau 2 (Produits finis)
+            "bioplastique": { name: "Bio-Plastique", icon: "🥤", color: "#68d391" },
+            "papier": { name: "Papier", icon: "📜", color: "#f7fafc" },
+            "electricite": { name: "Électricité Verte", icon: "💡", color: "#faf089" },
+            "engrais": { name: "Bio-Engrais", icon: "🌱", color: "#9ae6b4" }
+        };
+
+        const recipes = [
+            // Maïs
+            { a: "mais", b: "eau", result: "amidon" },
+            { a: "amidon", b: "microbe", result: "bioplastique" },
+            
+            // Bois
+            { a: "bois", b: "energie", result: "biochar" },
+            { a: "bois", b: "eau", result: "cellulose" },
+            { a: "cellulose", b: "energie", result: "papier" },
+
+            // Déchets
+            { a: "dechets", b: "microbe", result: "biogaz" },
+            { a: "dechets", b: "eau", result: "compost" },
+            
+            // Énergie avancée
+            { a: "biogaz", b: "energie", result: "electricite" },
+            { a: "compost", b: "dechets", result: "engrais" }
+        ];
+
+        let discovered = ["eau", "energie", "microbe", "mais", "bois", "dechets"];
+
+        // --- 2. ENGINE (Amélioré) ---
+
+        const libraryEl = document.getElementById('library');
+        const workspaceEl = document.getElementById('workspace');
+        const trashEl = document.getElementById('trash');
+
+        function init() {
+            renderSidebar();
+        }
+
+        function renderSidebar() {
+            libraryEl.innerHTML = '';
+            // Trier par ordre alphabétique pour faire propre
+            discovered.sort().forEach(key => {
+                const data = elementsDB[key];
+                const div = document.createElement('div');
+                div.className = 'element-source';
+                div.innerHTML = `<div>${data.icon}</div><span>${data.name}</span>`;
+                
+                // Clic simple pour faire apparaître (plus intuitif que le drag depuis sidebar pour certains)
+                div.onmousedown = (e) => {
+                    e.preventDefault();
+                    spawnElement(key, e.clientX, e.clientY, true);
+                };
+                
+                libraryEl.appendChild(div);
+            });
+        }
+
+        function spawnElement(key, x, y, autoDrag = false) {
+            const data = elementsDB[key];
+            const el = document.createElement('div');
+            el.className = 'element';
+            el.innerHTML = `<div>${data.icon}</div><span>${data.name}</span>`;
+            el.style.borderColor = data.color;
+            el.dataset.type = key;
+            
+            // Centrer sur x,y
+            el.style.left = (x - 40) + 'px';
+            el.style.top = (y - 40) + 'px';
+            
+            workspaceEl.appendChild(el);
+            
+            if(autoDrag) startDrag(el, x, y);
+
+            el.addEventListener('mousedown', (e) => startDrag(el, e.clientX, e.clientY));
+        }
+
+        // Système de Drag & Drop manuel (Sans l'API HTML5 buggée)
+        let activeEl = null;
+        let offset = { x: 0, y: 0 };
+
+        function startDrag(el, startX, startY) {
+            activeEl = el;
+            const rect = el.getBoundingClientRect();
+            offset.x = startX - rect.left;
+            offset.y = startY - rect.top;
+            
+            el.style.zIndex = 1000;
+            el.style.cursor = 'grabbing';
+            trashEl.classList.add('active');
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if (!activeEl) return;
+            e.preventDefault();
+            
+            activeEl.style.left = (e.clientX - offset.x) + 'px';
+            activeEl.style.top = (e.clientY - offset.y) + 'px';
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if (!activeEl) return;
+
+            const droppedEl = activeEl;
+            activeEl = null;
+            droppedEl.style.zIndex = 10;
+            droppedEl.style.cursor = 'grab';
+            trashEl.classList.remove('active');
+
+            // 1. Suppression (Poubelle)
+            const trashRect = trashEl.getBoundingClientRect();
+            const elRect = droppedEl.getBoundingClientRect();
+            const elCenter = { x: elRect.left + 40, y: elRect.top + 40 };
+
+            if (elCenter.x > trashRect.left && elCenter.y > trashRect.top) {
+                createParticles(elCenter.x, elCenter.y, "#e53e3e");
+                droppedEl.remove();
+                return;
+            }
+
+            // 2. Fusion
+            checkFusion(droppedEl);
+        });
+
+        function checkFusion(el1) {
+            const r1 = el1.getBoundingClientRect();
+            const c1 = { x: r1.left + 40, y: r1.top + 40 };
+
+            const all = document.querySelectorAll('#workspace .element');
+            
+            for (let el2 of all) {
+                if (el1 === el2) continue;
+
+                const r2 = el2.getBoundingClientRect();
+                const c2 = { x: r2.left + 40, y: r2.top + 40 };
+                
+                // Distance < 60px = Contact
+                const dist = Math.hypot(c1.x - c2.x, c1.y - c2.y);
+                
+                if (dist < 60) {
+                    const type1 = el1.dataset.type;
+                    const type2 = el2.dataset.type;
+                    
+                    const recipe = recipes.find(r => 
+                        (r.a === type1 && r.b === type2) || 
+                        (r.a === type2 && r.b === type1)
+                    );
+
+                    if (recipe) {
+                        // Création réussie
+                        createParticles(c2.x, c2.y, "#f6e05e"); // Effet visuel
+                        el1.remove();
+                        el2.remove();
+                        
+                        // Spawn au milieu
+                        spawnElement(recipe.result, (c1.x + c2.x)/2, (c1.y + c2.y)/2);
+                        
+                        // Nouvelle découverte ?
+                        if (!discovered.includes(recipe.result)) {
+                            discovered.push(recipe.result);
+                            renderSidebar();
+                            // Ajouter classe pour animation pop
+                            const newEl = workspaceEl.lastChild;
+                            newEl.classList.add('new-discovery');
+                        }
+                        break; // Stop loop
+                    }
+                }
+            }
+        }
+
+        // Petit système de particules pour le fun
+        function createParticles(x, y, color) {
+            for(let i=0; i<8; i++) {
+                const p = document.createElement('div');
+                p.style.position = 'fixed';
+                p.style.left = x + 'px';
+                p.style.top = y + 'px';
+                p.style.width = '6px';
+                p.style.height = '6px';
+                p.style.backgroundColor = color;
+                p.style.borderRadius = '50%';
+                p.style.pointerEvents = 'none';
+                document.body.appendChild(p);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 50 + 20;
+                
+                const anim = p.animate([
+                    { transform: `translate(0,0) scale(1)`, opacity: 1 },
+                    { transform: `translate(${Math.cos(angle)*velocity}px, ${Math.sin(angle)*velocity}px) scale(0)`, opacity: 0 }
+                ], { duration: 600, easing: 'ease-out' });
+                
+                anim.onfinish = () => p.remove();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
