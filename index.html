@@ -178,7 +178,8 @@
             "vetement": { name: "Vêtement Bio", icon: "👕", color: "#b794f4" }, // Nouveau
             "batiment": { name: "Bâtiment", icon: "🏢", color: "#a0aec0" }, // Nouveau
             "chaufferie": { name: "Chaufferie", icon: "🔥", color: "#e53e3e" }, // Nouveau
-            "voiture": { name: "Voiture", icon: "🚗", color: "#38b2ac" } // Nouveau
+            "voiture": { name: "Voiture", icon: "🚗", color: "#38b2ac" },
+            "maison clarisse": { name: "Maison Clarisse", icon: "🏢", color: "#a0aec0" }// Nouveau
         };
 
         const recipes = [
@@ -204,7 +205,8 @@
             // --- ÉNERGIE & INFRASTRUCTURE ---
             { a: "biogaz", b: "energie", result: "electricite" },
             { a: "bois", b: "dechets", result: "chaufferie" }, // Valorisation énergétique
-            { a: "bois", b: "bois", result: "batiment" }, // Construction bois (CLT)
+            { a: "bois", b: "bois", result: "batiment" },
+            { a: "bois", b: "tissu", result: "maison clarisse" },// Construction bois (CLT)
             { a: "compost", b: "dechets", result: "engrais" },
 
             // --- OBJETS FINIS ---
