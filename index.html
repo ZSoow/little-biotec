@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>My Little Biotec - Beta 0.2</title>
+    <title>My Little Biotec - Beta 0.3 (Full Economy)</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -25,7 +25,7 @@
 
         #sidebar {
             width: 320px;
-            background-color: #2d3748;
+            background-color: #1a202c; /* Plus sombre pour le contraste */
             color: white;
             padding: 20px;
             display: flex;
@@ -58,7 +58,7 @@
         }
 
         .element span {
-            font-size: 11px;
+            font-size: 10px;
             margin-top: 4px;
             color: #4a5568;
             font-weight: 700;
@@ -82,7 +82,7 @@
         .element-source {
             width: 70px;
             height: 70px;
-            background-color: #4a5568;
+            background-color: #2d3748;
             border-radius: 12px;
             display: flex;
             flex-direction: column;
@@ -95,8 +95,8 @@
             transition: all 0.2s;
         }
         
-        .element-source:hover { background-color: #718096; transform: translateY(-2px); }
-        .element-source span { font-size: 10px; margin-top: 5px; text-align: center; }
+        .element-source:hover { background-color: #4a5568; transform: translateY(-2px); border-color: #63b3ed; }
+        .element-source span { font-size: 9px; margin-top: 5px; text-align: center; }
 
         /* --- UI UTILS --- */
         #trash {
@@ -119,8 +119,17 @@
         #trash.active { opacity: 1; transform: scale(1.1); }
 
         /* Animation de découverte */
-        @keyframes pop { 0% { transform: scale(0); } 80% { transform: scale(1.2); } 100% { transform: scale(1); } }
-        .new-discovery { animation: pop 0.5s ease-out; box-shadow: 0 0 20px #f6e05e; border-color: #f6e05e !important; }
+        @keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        .new-discovery { animation: pop 0.6s ease-out; box-shadow: 0 0 25px #f6e05e; border-color: #f6e05e !important; z-index: 100 !important; }
+        
+        /* Petit badge pour les nouveaux items */
+        .badge-new {
+            position: absolute;
+            top: -5px; right: -5px;
+            background: #f56565; color: white;
+            font-size: 8px; padding: 2px 4px;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -135,10 +144,10 @@
     </div>
 
     <script>
-        // --- 1. DATA (Biotech Edition) ---
+        // --- 1. DATA (Bioeconomy Edition) ---
         
         const elementsDB = {
-            // Éléments de Base (Disponibles dès le début)
+            // --- NIVEAU 0 : Matières Premières ---
             "eau": { name: "Eau", icon: "💧", color: "#63b3ed" },
             "energie": { name: "Énergie", icon: "⚡", color: "#f6e05e" },
             "microbe": { name: "Microbes", icon: "🦠", color: "#9f7aea" },
@@ -146,42 +155,76 @@
             "bois": { name: "Bois", icon: "🪵", color: "#c05621" },
             "dechets": { name: "Déchets", icon: "🗑️", color: "#718096" },
 
-            // Niveau 1 (Premières transformations)
+            // --- NIVEAU 1 : Transformés ---
             "amidon": { name: "Amidon", icon: "🍚", color: "#fff5f5" },
             "cellulose": { name: "Cellulose", icon: "📄", color: "#fc8181" },
             "compost": { name: "Compost", icon: "💩", color: "#48bb78" },
             "biogaz": { name: "Biogaz", icon: "💨", color: "#81e6d9" },
             "biochar": { name: "Biochar", icon: "⚫", color: "#2d3748" },
+            "bioethanol": { name: "Bioéthanol", icon: "⛽", color: "#ed8936" }, // Nouveau
 
-            // Niveau 2 (Produits finis)
+            // --- NIVEAU 2 : Matériaux ---
             "bioplastique": { name: "Bio-Plastique", icon: "🥤", color: "#68d391" },
             "papier": { name: "Papier", icon: "📜", color: "#f7fafc" },
-            "electricite": { name: "Électricité Verte", icon: "💡", color: "#faf089" },
-            "engrais": { name: "Bio-Engrais", icon: "🌱", color: "#9ae6b4" }
+            "electricite": { name: "Électricité", icon: "💡", color: "#faf089" },
+            "engrais": { name: "Bio-Engrais", icon: "🌱", color: "#9ae6b4" },
+            "encre": { name: "Encre Végétale", icon: "✒️", color: "#4a5568" }, // Nouveau (Biochar + Eau)
+            "tissu": { name: "Fibre Textile", icon: "🧶", color: "#fbb6ce" }, // Nouveau
+
+            // --- NIVEAU 3 : Objets du quotidien & Usages ---
+            "livre": { name: "Livre", icon: "📚", color: "#ecc94b" }, // Nouveau
+            "cahier": { name: "Cahier", icon: "📓", color: "#e2e8f0" }, // Nouveau
+            "stylo": { name: "Stylo Bio", icon: "🖊️", color: "#4299e1" }, // Nouveau
+            "vetement": { name: "Vêtement Bio", icon: "👕", color: "#b794f4" }, // Nouveau
+            "batiment": { name: "Bâtiment", icon: "🏢", color: "#a0aec0" }, // Nouveau
+            "chaufferie": { name: "Chaufferie", icon: "🔥", color: "#e53e3e" }, // Nouveau
+            "voiture": { name: "Voiture", icon: "🚗", color: "#38b2ac" } // Nouveau
         };
 
         const recipes = [
+            // --- TRANSFORMATIONS BASE ---
             // Maïs
             { a: "mais", b: "eau", result: "amidon" },
-            { a: "amidon", b: "microbe", result: "bioplastique" },
-            
+            { a: "mais", b: "microbe", result: "bioethanol" }, // Fermentation
+
             // Bois
             { a: "bois", b: "energie", result: "biochar" },
             { a: "bois", b: "eau", result: "cellulose" },
-            { a: "cellulose", b: "energie", result: "papier" },
-
+            
             // Déchets
             { a: "dechets", b: "microbe", result: "biogaz" },
             { a: "dechets", b: "eau", result: "compost" },
-            
-            // Énergie avancée
+
+            // --- MATÉRIAUX AVANCÉS ---
+            { a: "amidon", b: "microbe", result: "bioplastique" },
+            { a: "cellulose", b: "energie", result: "papier" },
+            { a: "biochar", b: "eau", result: "encre" }, // Pigments noirs naturels
+            { a: "cellulose", b: "bioplastique", result: "tissu" }, // Fibres synthétiques biosourcées
+
+            // --- ÉNERGIE & INFRASTRUCTURE ---
             { a: "biogaz", b: "energie", result: "electricite" },
-            { a: "compost", b: "dechets", result: "engrais" }
+            { a: "bois", b: "dechets", result: "chaufferie" }, // Valorisation énergétique
+            { a: "bois", b: "bois", result: "batiment" }, // Construction bois (CLT)
+            { a: "compost", b: "dechets", result: "engrais" },
+
+            // --- OBJETS FINIS ---
+            // École / Bureau
+            { a: "papier", b: "papier", result: "livre" },
+            { a: "papier", b: "encre", result: "cahier" },
+            { a: "bioplastique", b: "encre", result: "stylo" },
+            
+            // Mode
+            { a: "tissu", b: "tissu", result: "vetement" },
+
+            // Transport
+            { a: "bioplastique", b: "energie", result: "voiture" }, // Voiture allégée
+            { a: "voiture", b: "bioethanol", result: "voiture" } // (Easter egg: faire le plein ne change rien visuellement mais c'est logique !)
         ];
 
+        // On garde les découvertes de base
         let discovered = ["eau", "energie", "microbe", "mais", "bois", "dechets"];
 
-        // --- 2. ENGINE (Amélioré) ---
+        // --- 2. ENGINE ---
 
         const libraryEl = document.getElementById('library');
         const workspaceEl = document.getElementById('workspace');
@@ -193,14 +236,13 @@
 
         function renderSidebar() {
             libraryEl.innerHTML = '';
-            // Trier par ordre alphabétique pour faire propre
+            // Tri alphabétique
             discovered.sort().forEach(key => {
                 const data = elementsDB[key];
                 const div = document.createElement('div');
                 div.className = 'element-source';
                 div.innerHTML = `<div>${data.icon}</div><span>${data.name}</span>`;
                 
-                // Clic simple pour faire apparaître (plus intuitif que le drag depuis sidebar pour certains)
                 div.onmousedown = (e) => {
                     e.preventDefault();
                     spawnElement(key, e.clientX, e.clientY, true);
@@ -218,7 +260,7 @@
             el.style.borderColor = data.color;
             el.dataset.type = key;
             
-            // Centrer sur x,y
+            // Centrage
             el.style.left = (x - 40) + 'px';
             el.style.top = (y - 40) + 'px';
             
@@ -229,7 +271,7 @@
             el.addEventListener('mousedown', (e) => startDrag(el, e.clientX, e.clientY));
         }
 
-        // Système de Drag & Drop manuel (Sans l'API HTML5 buggée)
+        // Drag & Drop
         let activeEl = null;
         let offset = { x: 0, y: 0 };
 
@@ -261,7 +303,7 @@
             droppedEl.style.cursor = 'grab';
             trashEl.classList.remove('active');
 
-            // 1. Suppression (Poubelle)
+            // 1. Poubelle
             const trashRect = trashEl.getBoundingClientRect();
             const elRect = droppedEl.getBoundingClientRect();
             const elCenter = { x: elRect.left + 40, y: elRect.top + 40 };
@@ -301,29 +343,28 @@
                     );
 
                     if (recipe) {
-                        // Création réussie
-                        createParticles(c2.x, c2.y, "#f6e05e"); // Effet visuel
+                        // Création
+                        createParticles(c2.x, c2.y, "#f6e05e");
                         el1.remove();
                         el2.remove();
                         
-                        // Spawn au milieu
                         spawnElement(recipe.result, (c1.x + c2.x)/2, (c1.y + c2.y)/2);
                         
-                        // Nouvelle découverte ?
+                        // Découverte
                         if (!discovered.includes(recipe.result)) {
                             discovered.push(recipe.result);
                             renderSidebar();
-                            // Ajouter classe pour animation pop
+                            
+                            // Feedback visuel fort
                             const newEl = workspaceEl.lastChild;
                             newEl.classList.add('new-discovery');
                         }
-                        break; // Stop loop
+                        break; 
                     }
                 }
             }
         }
 
-        // Petit système de particules pour le fun
         function createParticles(x, y, color) {
             for(let i=0; i<8; i++) {
                 const p = document.createElement('div');
