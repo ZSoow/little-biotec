@@ -148,82 +148,118 @@
         
         const elementsDB = {
             // --- NIVEAU 0 : Matières Premières ---
+            "terre": { name: "Terre", icon: "🌍", color: "#795548" }, // Demandé
             "eau": { name: "Eau", icon: "💧", color: "#63b3ed" },
-            "energie": { name: "Énergie", icon: "⚡", color: "#f6e05e" },
+            "feu": { name: "Feu", icon: "🔥", color: "#e53e3e" },
+            "air": { name: "Air", icon: "💨", color: "#a0aec0" },
+            "soleil": { name: "Soleil", icon: "☀️", color: "#f6e05e" },
+
+            // --- VIVANT & NATURE ---
             "microbe": { name: "Microbes", icon: "🦠", color: "#9f7aea" },
+            "graine": { name: "Graine", icon: "🌰", color: "#d69e2e" },
             "mais": { name: "Maïs", icon: "🌽", color: "#f6ad55" },
             "bois": { name: "Bois", icon: "🪵", color: "#c05621" },
-            "dechets": { name: "Déchets", icon: "🗑️", color: "#718096" },
+            "foret": { name: "Forêt", icon: "🌲", color: "#2f855a" },
+            "algue": { name: "Algues", icon: "🌿", color: "#38a169" }, // Très important pour la bioéconomie
             "humain": { name: "Humain", icon: "🧑", color: "#fbd38d" },
-            "terre": { name: "Terre", icon: "🌍", color: "#795548" },
 
-            // --- NIVEAU 1 : Transformés ---
+            // --- RESSOURCES & DÉCHETS ---
+            "dechets": { name: "Déchets", icon: "🗑️", color: "#718096" },
+            "biomasse": { name: "Biomasse", icon: "🍂", color: "#744210" },
+
+            // --- TRANSFORMÉS (Chimie Verte) ---
             "amidon": { name: "Amidon", icon: "🍚", color: "#fff5f5" },
             "cellulose": { name: "Cellulose", icon: "📄", color: "#fc8181" },
             "compost": { name: "Compost", icon: "💩", color: "#48bb78" },
-            "biogaz": { name: "Biogaz", icon: "💨", color: "#81e6d9" },
+            "biogaz": { name: "Biogaz", icon: "♨️", color: "#81e6d9" },
             "biochar": { name: "Biochar", icon: "⚫", color: "#2d3748" },
-            "bioethanol": { name: "Bioéthanol", icon: "⛽", color: "#ed8936" }, // Nouveau
+            "bioethanol": { name: "Bioéthanol", icon: "⛽", color: "#ed8936" },
+            "enzyme": { name: "Enzymes", icon: "🧪", color: "#b794f4" }, // Catalyseur
 
-            // --- NIVEAU 2 : Matériaux ---
+            // --- MATÉRIAUX ---
             "bioplastique": { name: "Bio-Plastique", icon: "🥤", color: "#68d391" },
             "papier": { name: "Papier", icon: "📜", color: "#f7fafc" },
-            "electricite": { name: "Électricité", icon: "💡", color: "#faf089" },
-            "engrais": { name: "Bio-Engrais", icon: "🌱", color: "#9ae6b4" },
-            "encre": { name: "Encre Végétale", icon: "✒️", color: "#4a5568" }, // Nouveau (Biochar + Eau)
-            "tissu": { name: "Fibre Textile", icon: "🧶", color: "#fbb6ce" }, // Nouveau
+            "tissu": { name: "Fibre Textile", icon: "🧶", color: "#fbb6ce" },
+            "verre": { name: "Verre", icon: "🥃", color: "#a3bffa" },
+            "metal": { name: "Métal", icon: "🔩", color: "#cbd5e0" }, // Pour l'industrie
 
-            // --- NIVEAU 3 : Objets du quotidien & Usages ---
-            "livre": { name: "Livre", icon: "📚", color: "#ecc94b" }, // Nouveau
-            "cahier": { name: "Cahier", icon: "📓", color: "#e2e8f0" }, // Nouveau
-            "stylo": { name: "Stylo Bio", icon: "🖊️", color: "#4299e1" }, // Nouveau
-            "vetement": { name: "Vêtement Bio", icon: "👕", color: "#b794f4" }, // Nouveau
-            "batiment": { name: "Bâtiment", icon: "🏢", color: "#a0aec0" }, // Nouveau
-            "chaufferie": { name: "Chaufferie", icon: "🔥", color: "#e53e3e" }, // Nouveau
+            // --- ACTEURS & MÉTIERS ---
+            "agriculteur": { name: "Agriculteur", icon: "👨‍🌾", color: "#68d391" },
+            "scientifique": { name: "Scientifique", icon: "👨‍🔬", color: "#63b3ed" },
+            "ingenieur": { name: "Ingénieur", icon: "👷", color: "#f6ad55" },
+
+            // --- INFRASTRUCTURES ---
+            "champ": { name: "Champ", icon: "🚜", color: "#f0fff4" },
+            "usine": { name: "Usine", icon: "🏭", color: "#718096" },
+            "labo": { name: "Laboratoire", icon: "🔬", color: "#e2e8f0" },
+            "bioraffinerie": { name: "Bioraffinerie", icon: "🏗️", color: "#319795" }, // Le coeur de la bioéconomie
+            "panneau": { name: "Panneau Solaire", icon: "🔋", color: "#2c5282" },
+
+            // --- ÉNERGIE ---
+            "energie": { name: "Énergie", icon: "⚡", color: "#f6e05e" },
+            "electricite": { name: "Électricité", icon: "💡", color: "#faf089" },
+            "chaleur": { name: "Chaleur", icon: "🌡️", color: "#e53e3e" },
+
+            // --- PRODUITS FINIS ---
+            "livre": { name: "Livre", icon: "📚", color: "#ecc94b" },
+            "vetement": { name: "Vêtement", icon: "👕", color: "#b794f4" },
+            "batiment": { name: "Bâtiment", icon: "🏢", color: "#a0aec0" },
             "voiture": { name: "Voiture", icon: "🚗", color: "#38b2ac" },
-            "maison clarisse": { name: "Maison Clarisse", icon: "🏢", color: "#a0aec0" }// Nouveau
+            "medicament": { name: "Médicament", icon: "💊", color: "#fc8181" }
         };
 
         const recipes = [
-            // --- TRANSFORMATIONS BASE ---
-            { a: "humain", b: "terre", result: "mais" },
-            // Maïs
-            { a: "mais", b: "eau", result: "amidon" },
-            { a: "mais", b: "microbe", result: "bioethanol" }, // Fermentation
+            // --- 1. NATURE ET ÉLÉMENTS DE BASE ---
+            { a: "terre", b: "eau", result: "biomasse" }, // La boue fertile
+            { a: "terre", b: "graine", result: "champ" },
+            { a: "champ", b: "eau", result: "mais" },
+            { a: "terre", b: "bois", result: "foret" },
+            { a: "eau", b: "soleil", result: "algue" }, // Photosynthèse aquatique
+            { a: "feu", b: "bois", result: "chaleur" },
+            { a: "sable", b: "feu", result: "verre" }, // (Si on ajoute sable un jour, sinon terre+feu = brique/metal brut)
+            { a: "terre", b: "feu", result: "metal" }, // Simplification : extraction minière
 
-            // Bois
-            { a: "bois", b: "energie", result: "biochar" },
-            { a: "bois", b: "eau", result: "cellulose" },
+            // --- 2. ÉDUCATION ET MÉTIERS ---
+            { a: "humain", b: "champ", result: "agriculteur" },
+            { a: "humain", b: "livre", result: "scientifique" },
+            { a: "humain", b: "usine", result: "ingenieur" },
+            { a: "scientifique", b: "microbe", result: "enzyme" }, // Découverte biotechnologique
+
+            // --- 3. INFRASTRUCTURES ---
+            { a: "metal", b: "energie", result: "usine" },
+            { a: "usine", b: "microbe", result: "bioraffinerie" }, // Usine avancée
+            { a: "verre", b: "soleil", result: "panneau" }, // Panneau solaire
+            { a: "panneau", b: "soleil", result: "electricite" },
+            { a: "batiment", b: "microbe", result: "labo" },
+
+            // --- 4. TRANSFORMATIONS (BIOÉCONOMIE) ---
+            // Voie Maïs/Plantes
+            { a: "mais", b: "usine", result: "amidon" },
+            { a: "amidon", b: "enzyme", result: "bioplastique" }, // Plus réaliste avec enzyme
             
-            // Déchets
-            { a: "dechets", b: "microbe", result: "biogaz" },
-            { a: "dechets", b: "eau", result: "compost" },
-
-            // --- MATÉRIAUX AVANCÉS ---
-            { a: "amidon", b: "microbe", result: "bioplastique" },
+            // Voie Bois/Fibres
+            { a: "bois", b: "usine", result: "cellulose" },
             { a: "cellulose", b: "energie", result: "papier" },
-            { a: "biochar", b: "eau", result: "encre" }, // Pigments noirs naturels
-            { a: "cellulose", b: "bioplastique", result: "tissu" }, // Fibres synthétiques biosourcées
-
-            // --- ÉNERGIE & INFRASTRUCTURE ---
-            { a: "biogaz", b: "energie", result: "electricite" },
-            { a: "bois", b: "dechets", result: "chaufferie" }, // Valorisation énergétique
-            { a: "bois", b: "bois", result: "batiment" },
-            { a: "bois", b: "tissu", result: "maison clarisse" },// Construction bois (CLT)
-            { a: "compost", b: "dechets", result: "engrais" },
-
-            // --- OBJETS FINIS ---
-            // École / Bureau
-            { a: "papier", b: "papier", result: "livre" },
-            { a: "papier", b: "encre", result: "cahier" },
-            { a: "bioplastique", b: "encre", result: "stylo" },
+            { a: "cellulose", b: "enzyme", result: "tissu" }, // Viscose/Lyocell
             
-            // Mode
-            { a: "tissu", b: "tissu", result: "vetement" },
+            // Voie Déchets/Circulaire
+            { a: "dechets", b: "microbe", result: "biogaz" },
+            { a: "dechets", b: "verre", result: "compost" }, // Erreur de ma part, disons Dechets + Terre = Compost
+            { a: "dechets", b: "terre", result: "compost" },
+            { a: "biogaz", b: "usine", result: "electricite" },
 
-            // Transport
-            { a: "bioplastique", b: "energie", result: "voiture" }, // Voiture allégée
-            { a: "voiture", b: "bioethanol", result: "voiture" } // (Easter egg: faire le plein ne change rien visuellement mais c'est logique !)
+            // Voie Algues (Le futur)
+            { a: "algue", b: "bioraffinerie", result: "bioethanol" },
+            { a: "algue", b: "labo", result: "medicament" },
+            { a: "algue", b: "soleil", result: "bioplastique" }, // Certaines algues font du plastique
+
+            // --- 5. OBJETS FINIS ---
+            { a: "papier", b: "humain", result: "livre" },
+            { a: "tissu", b: "humain", result: "vetement" },
+            { a: "bois", b: "bois", result: "batiment" },
+            { a: "bioplastique", b: "ingenieur", result: "voiture" },
+            { a: "voiture", b: "bioethanol", result: "voiture" }, // Faire le plein
+            { a: "voiture", b: "electricite", result: "voiture" }// (Easter egg: faire le plein ne change rien visuellement mais c'est logique !)
         ];
 
         // On garde les découvertes de base
