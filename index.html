@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>My Little Biotec - Beta 0.6 (Civilisation)</title>
+    <title>My Little Biotec - Beta 0.7</title>
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -10,11 +10,10 @@
             padding: 0;
             display: flex;
             height: 100vh;
-            background-color: #e2e8f0;
+            background-color: #f0f4f8;
             overflow: hidden;
         }
 
-        /* --- ZONES --- */
         #workspace {
             flex-grow: 1;
             position: relative;
@@ -24,8 +23,8 @@
         }
 
         #sidebar {
-            width: 360px;
-            background-color: #2d3748;
+            width: 350px;
+            background-color: #1a202c;
             color: white;
             padding: 20px;
             display: flex;
@@ -35,12 +34,8 @@
             z-index: 20;
         }
 
-        h2 { margin-top: 0; text-align: center; color: #a0aec0; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; }
-        
-        #stats { text-align: center; margin-bottom: 20px; font-size: 12px; color: #a0aec0; border-bottom: 1px solid #4a5568; padding-bottom: 10px;}
-        #stats b { color: #63b3ed; }
+        h2 { margin-top: 0; text-align: center; color: #a0aec0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 2px; }
 
-        /* --- ÉLÉMENTS --- */
         .element {
             width: 80px;
             height: 80px;
@@ -74,7 +69,6 @@
             text-overflow: ellipsis;
         }
 
-        /* Styles Sidebar */
         #library {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
@@ -85,7 +79,7 @@
         .element-source {
             width: 70px;
             height: 70px;
-            background-color: #4a5568;
+            background-color: #2d3748;
             border-radius: 12px;
             display: flex;
             flex-direction: column;
@@ -96,33 +90,30 @@
             font-size: 24px;
             border: 2px solid transparent;
             transition: all 0.2s;
-            position: relative;
         }
         
-        .element-source:hover { background-color: #718096; transform: translateY(-2px); border-color: #63b3ed; }
+        .element-source:hover { background-color: #4a5568; transform: translateY(-2px); border-color: #63b3ed; }
         .element-source span { font-size: 9px; margin-top: 5px; text-align: center; }
 
-        /* --- UI UTILS --- */
         #trash {
             position: absolute;
             bottom: 30px;
             right: 30px;
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             background: #feb2b2;
             color: #c53030;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 35px;
+            font-size: 30px;
             border: 2px dashed #c53030;
-            opacity: 0.6;
-            transition: all 0.3s;
+            opacity: 0.5;
+            transition: opacity 0.3s;
         }
-        #trash.active { opacity: 1; transform: scale(1.1); background: #fc8181; color: white; border-style: solid;}
+        #trash.active { opacity: 1; transform: scale(1.1); }
 
-        /* Animation de découverte */
         @keyframes pop { 0% { transform: scale(0); } 70% { transform: scale(1.3); } 100% { transform: scale(1); } }
         .new-discovery { animation: pop 0.6s ease-out; box-shadow: 0 0 25px #f6e05e; border-color: #f6e05e !important; z-index: 100 !important; }
     </style>
@@ -130,160 +121,138 @@
 <body>
 
     <div id="workspace">
-        <div id="trash">♻️</div>
+        <div id="trash">🗑️</div>
     </div>
 
     <div id="sidebar">
-        <h2>Monde</h2>
-        <div id="stats">Découvertes : <span id="count">0</span> / <span id="total">0</span></div>
+        <h2>Laboratoire</h2>
         <div id="library"></div>
     </div>
 
     <script>
-        // --- 1. DATA (L'Encyclopédie Complète) ---
+        // --- 1. DATA (BASE DE DONNÉES COMPLÈTE) ---
         
         const elementsDB = {
-            // --- 1. ÉLÉMENTS NATURELS ---
-            "terre": { name: "Terre", icon: "🌍", color: "#795548" },
+            // --- BASES (Disponibles au départ) ---
             "eau": { name: "Eau", icon: "💧", color: "#63b3ed" },
-            "feu": { name: "Feu", icon: "🔥", color: "#e53e3e" },
-            "air": { name: "Air", icon: "🌫️", color: "#a0aec0" },
-            "soleil": { name: "Soleil", icon: "☀️", color: "#f6e05e" },
-            
-            // --- 2. GÉOLOGIE & MÉTÉO ---
-            "pierre": { name: "Pierre", icon: "🪨", color: "#718096" },
-            "sable": { name: "Sable", icon: "🏜️", color: "#f6e05e" },
+            "feu": { name: "Feu", icon: "🔥", color: "#f56565" },
+            "terre": { name: "Terre", icon: "🌍", color: "#795548" },
+            "air": { name: "Air", icon: "💨", color: "#e2e8f0" },
+            "humain": { name: "Humain", icon: "🧑", color: "#fbd38d" },
+            "microbe": { name: "Microbes", icon: "🦠", color: "#9f7aea" },
+            "graine": { name: "Graine", icon: "🌰", color: "#d69e2e" },
+            "dechets": { name: "Déchets", icon: "🗑️", color: "#718096" }, // Réintégré au départ
+
+            // --- NATURE (Niveau 1) ---
             "pluie": { name: "Pluie", icon: "🌧️", color: "#90cdf4" },
-            "vent": { name: "Vent", icon: "🍃", color: "#cbd5e0" },
-            "vapeur": { name: "Vapeur", icon: "♨️", color: "#e2e8f0" },
+            "plante": { name: "Plante", icon: "🌿", color: "#68d391" },
+            "bois": { name: "Bois", icon: "🪵", color: "#c05621" },
+            "mais": { name: "Maïs", icon: "🌽", color: "#f6ad55" },
+            "canne": { name: "Canne à Sucre", icon: "🎋", color: "#9ae6b4" }, // NOUVEAU
+            "sucre": { name: "Sucre", icon: "🍬", color: "#fff" }, // NOUVEAU
+            "soleil": { name: "Soleil", icon: "☀️", color: "#f6e05e" },
+            "vapeur": { name: "Vapeur", icon: "♨️", color: "#edf2f7" },
+            "energie": { name: "Énergie", icon: "⚡", color: "#faf089" },
+            "pierre": { name: "Pierre", icon: "🪨", color: "#718096" },
             "boue": { name: "Boue", icon: "💩", color: "#5d4037" },
 
-            // --- 3. BIOLOGIE ---
-            "microbe": { name: "Microbe", icon: "🦠", color: "#9f7aea" },
-            "graine": { name: "Graine", icon: "🌰", color: "#d69e2e" },
-            "algue": { name: "Algue", icon: "🌿", color: "#38a169" },
-            "arbre": { name: "Arbre", icon: "🌳", color: "#2f855a" },
-            "foret": { name: "Forêt", icon: "🌲", color: "#22543d" },
-            "fleur": { name: "Fleur", icon: "🌺", color: "#ed64a6" },
-            "humain": { name: "Humain", icon: "🧑", color: "#fbd38d" },
-            "animal": { name: "Animal", icon: "🐄", color: "#ed8936" },
+            // --- OUTILS & INFRA (Niveau 2) ---
+            "outil": { name: "Outil", icon: "🔨", color: "#a0aec0" }, // NOUVEAU (Pierre + Bois)
+            "usine": { name: "Usine", icon: "🏭", color: "#4a5568" }, // Réintégré
+            "fer": { name: "Métal", icon: "🔧", color: "#cbd5e0" },
+            "verre": { name: "Verre", icon: "🔍", color: "#e2e8f0" },
+            "roue": { name: "Roue", icon: "⚙️", color: "#4a5568" },
 
-            // --- 4. RESSOURCES AGRICOLES ---
-            "mais": { name: "Maïs", icon: "🌽", color: "#f6ad55" },
-            "ble": { name: "Blé", icon: "🌾", color: "#ecc94b" },
-            "bois": { name: "Bois", icon: "🪵", color: "#c05621" },
-            "canne": { name: "Canne à sucre", icon: "🎋", color: "#9ae6b4" },
-            "lait": { name: "Lait", icon: "🥛", color: "#fff" },
-
-            // --- 5. ALIMENTATION (NOUVEAU) ---
-            "farine": { name: "Farine", icon: "🥡", color: "#fffff0" },
-            "pate": { name: "Pâte", icon: "🥟", color: "#fefcbf" },
-            "pain": { name: "Pain", icon: "🥖", color: "#d69e2e" },
-            "biere": { name: "Bière", icon: "🍺", color: "#f6e05e" },
-            "sucre": { name: "Sucre", icon: "🧂", color: "#fff" },
-
-            // --- 6. INDUSTRIE & TRANSFORMATION ---
-            "energie": { name: "Énergie", icon: "⚡", color: "#f6e05e" },
-            "electricite": { name: "Électricité", icon: "💡", color: "#faf089" },
-            "dechets": { name: "Déchets", icon: "🗑️", color: "#718096" },
-            "metal": { name: "Métal", icon: "🔩", color: "#cbd5e0" },
-            "verre": { name: "Verre", icon: "🥃", color: "#a3bffa" },
-            "brique": { name: "Brique", icon: "🧱", color: "#c05621" },
-            "outil": { name: "Outil", icon: "🔨", color: "#4a5568" },
-
-            // --- 7. CHIMIE VERTE ---
+            // --- CHIMIE & MATÉRIAUX (Niveau 3) ---
             "amidon": { name: "Amidon", icon: "🍚", color: "#fff5f5" },
             "cellulose": { name: "Cellulose", icon: "📄", color: "#fc8181" },
-            "bioplastique": { name: "Bio-Plastique", icon: "🥤", color: "#68d391" },
             "biogaz": { name: "Biogaz", icon: "💨", color: "#81e6d9" },
-            "engrais": { name: "Engrais", icon: "💩", color: "#48bb78" },
+            "biochar": { name: "Biochar", icon: "⚫", color: "#2d3748" },
             "bioethanol": { name: "Bioéthanol", icon: "⛽", color: "#ed8936" },
+            "bioplastique": { name: "Bio-Plastique", icon: "🥤", color: "#68d391" },
+            "papier": { name: "Papier", icon: "📜", color: "#f7fafc" },
+            "tissu": { name: "Textile", icon: "🧶", color: "#fbb6ce" },
+            "encre": { name: "Encre", icon: "✒️", color: "#2d3748" },
+            "compost": { name: "Compost", icon: "🌱", color: "#48bb78" },
 
-            // --- 8. CIVILISATION & VILLE ---
-            "maison": { name: "Maison", icon: "🏠", color: "#ecc94b" },
-            "usine": { name: "Usine", icon: "🏭", color: "#718096" },
-            "ville": { name: "Ville", icon: "🏙️", color: "#a0aec0" },
-            "ferme": { name: "Ferme", icon: "🚜", color: "#48bb78" },
-            "eolienne": { name: "Éolienne", icon: "🌬️", color: "#e2e8f0" },
-            "panneau": { name: "Panneau Solaire", icon: "🔋", color: "#2c5282" },
-            "voiture": { name: "Voiture", icon: "🚗", color: "#38b2ac" },
-            "avion": { name: "Avion", icon: "✈️", color: "#63b3ed" },
-
-            // --- 9. CONSÉQUENCES ---
-            "pollution": { name: "Pollution", icon: "☠️", color: "#2d3748" },
-            "co2": { name: "CO2", icon: "☁️", color: "#718096" }
+            // --- CIVILISATION (Niveau 4) ---
+            "livre": { name: "Livre", icon: "📚", color: "#ecc94b" },
+            "meuble": { name: "Meuble", icon: "🪑", color: "#c05621" }, // NOUVEAU
+            "maison": { name: "Maison", icon: "🏠", color: "#ed8936" },
+            "savant": { name: "Savant", icon: "👨‍🔬", color: "#fff" },
+            "agriculteur": { name: "Agriculteur", icon: "👨‍🌾", color: "#48bb78" },
+            "voiture": { name: "Voiture Bio", icon: "🚗", color: "#38b2ac" },
+            "ville": { name: "Ville Verte", icon: "🏙️", color: "#4299e1" }
         };
 
         const recipes = [
-            // --- BASES PHYSIQUES ---
-            { a: "terre", b: "terre", result: "pierre" },
-            { a: "pierre", b: "eau", result: "sable" }, // Erosion
-            { a: "pierre", b: "feu", result: "metal" }, // Extraction
-            { a: "sable", b: "feu", result: "verre" },
-            { a: "terre", b: "eau", result: "boue" },
-            { a: "boue", b: "feu", result: "brique" },
-            { a: "air", b: "eau", result: "pluie" },
-            { a: "air", b: "air", result: "vent" },
+            // --- 1. LES BASES DE LA NATURE ---
             { a: "eau", b: "feu", result: "vapeur" },
-            { a: "vapeur", b: "air", result: "co2" }, // Simplification
+            { a: "vapeur", b: "air", result: "pluie" },
+            { a: "feu", b: "air", result: "energie" },
+            { a: "feu", b: "terre", result: "pierre" },
+            { a: "terre", b: "eau", result: "boue" },
+            { a: "feu", b: "energie", result: "soleil" },
 
-            // --- VIVANT ---
-            { a: "terre", b: "graine", result: "arbre" },
-            { a: "arbre", b: "arbre", result: "foret" },
-            { a: "eau", b: "soleil", result: "algue" },
-            { a: "graine", b: "soleil", result: "fleur" },
-            { a: "humain", b: "graine", result: "ble" }, // Agriculture primitive
-            { a: "humain", b: "animal", result: "lait" }, // Élevage
-
-            // --- OUTILS & ÉNERGIE (CORRIGÉ !) ---
-            { a: "bois", b: "metal", result: "outil" },
-            { a: "feu", b: "bois", result: "energie" }, // Le moyen le plus simple
-            { a: "vent", b: "metal", result: "eolienne" },
-            { a: "eolienne", b: "vent", result: "electricite" },
-            { a: "soleil", b: "verre", result: "panneau" },
-            { a: "panneau", b: "soleil", result: "electricite" },
-            { a: "vapeur", b: "metal", result: "energie" }, // Machine à vapeur
-
-            // --- TRANSFORMATIONS (AMIDON ET AUTRES) ---
-            { a: "mais", b: "outil", result: "amidon" }, // Maïs broyé
-            { a: "mais", b: "eau", result: "amidon" },   // Maïs trempé (Alternative)
-            { a: "ble", b: "pierre", result: "farine" },
-            { a: "farine", b: "eau", result: "pate" },
-            { a: "pate", b: "feu", result: "pain" },
-            { a: "ble", b: "microbe", result: "biere" }, // Fermentation
-            { a: "canne", b: "outil", result: "sucre" },
-            { a: "sucre", b: "microbe", result: "bioethanol" },
+            // --- 2. VÉGÉTATION & AGRICULTURE ---
+            { a: "terre", b: "graine", result: "plante" },
+            { a: "plante", b: "soleil", result: "mais" },
+            { a: "plante", b: "eau", result: "canne" }, // Recette Canne
+            { a: "plante", b: "temps", result: "bois" }, // Alternative
+            { a: "plante", b: "terre", result: "bois" },
             
-            // --- INDUSTRIE BIO ---
-            { a: "amidon", b: "microbe", result: "bioplastique" },
+            // --- 3. PREMIERS OUTILS ---
+            { a: "pierre", b: "bois", result: "outil" }, // Outil de base
+            { a: "pierre", b: "feu", result: "fer" },
+            { a: "fer", b: "energie", result: "usine" }, // Création de l'usine
+            { a: "bois", b: "fer", result: "roue" },
+
+            // --- 4. TRANSFORMATIONS (BIOÉCONOMIE) ---
+            // Sucre & Amidon
+            { a: "canne", b: "outil", result: "sucre" }, // Extraction sucre
+            { a: "canne", b: "usine", result: "sucre" },
+            { a: "mais", b: "outil", result: "amidon" },
+            { a: "mais", b: "usine", result: "amidon" },
+
+            // Bois
             { a: "bois", b: "usine", result: "cellulose" },
-            { a: "cellulose", b: "energie", result: "papier" }, // Méthode artisanale
-            { a: "dechets", b: "microbe", result: "biogaz" },
-            { a: "dechets", b: "terre", result: "engrais" },
-            
-            // --- VILLE & TRANSPORTS ---
-            { a: "brique", b: "brique", result: "maison" },
-            { a: "maison", b: "maison", result: "ville" },
-            { a: "ville", b: "energie", result: "pollution" }, // Triste réalité
-            { a: "pollution", b: "foret", result: "air" }, // Les arbres nettoient l'air !
-            { a: "bioplastique", b: "energie", result: "voiture" },
-            { a: "metal", b: "bioethanol", result: "avion" }, // Biokérosène
+            { a: "bois", b: "outil", result: "meuble" }, // Correction du bug "bois + outil"
+            { a: "bois", b: "feu", result: "biochar" },
 
-            // --- MÉTIERS ---
-            { a: "humain", b: "outil", result: "ferme" },
-            { a: "humain", b: "brique", result: "usine" },
+            // Déchets
+            { a: "dechets", b: "terre", result: "compost" },
+            { a: "dechets", b: "microbe", result: "biogaz" },
+
+            // --- 5. MATÉRIAUX AVANCÉS ---
+            { a: "amidon", b: "microbe", result: "bioplastique" }, // Le classique
+            { a: "sucre", b: "microbe", result: "bioethanol" }, // Fermentation du sucre
+            { a: "mais", b: "microbe", result: "bioethanol" }, // Fermentation directe
+            { a: "cellulose", b: "energie", result: "papier" },
+            { a: "cellulose", b: "bioplastique", result: "tissu" },
+            { a: "biochar", b: "eau", result: "encre" },
+
+            // --- 6. PRODUITS FINIS ---
+            { a: "bioplastique", b: "roue", result: "voiture" },
+            { a: "papier", b: "encre", result: "livre" },
+            { a: "bois", b: "pierre", result: "maison" },
+            
+            // --- 7. HUMANITÉ ---
+            { a: "humain", b: "plante", result: "agriculteur" },
+            { a: "humain", b: "livre", result: "savant" },
+            { a: "maison", b: "maison", result: "ville" },
+
+            // --- 8. FONCTIONNEMENT ---
+            { a: "voiture", b: "bioethanol", result: "voiture" } // Faire le plein
         ];
 
-        // Éléments de départ (J'en ai ajouté pour faciliter le début)
-        let discovered = ["terre", "eau", "feu", "air", "humain", "soleil", "graine", "microbe", "bois"];
+        // Éléments de départ
+        let discovered = ["terre", "eau", "feu", "air", "humain", "graine", "microbe", "dechets"];
 
-        // --- MOTEUR DE JEU (Optimisé) ---
+        // --- MOTEUR (Optimisé pour éviter les bugs) ---
 
         const libraryEl = document.getElementById('library');
         const workspaceEl = document.getElementById('workspace');
         const trashEl = document.getElementById('trash');
-        const countEl = document.getElementById('count');
-        const totalEl = document.getElementById('total');
 
         function init() {
             renderSidebar();
@@ -291,17 +260,9 @@
 
         function renderSidebar() {
             libraryEl.innerHTML = '';
-            
-            countEl.innerText = discovered.length;
-            totalEl.innerText = Object.keys(elementsDB).length;
-
-            // Trier par ordre alphabétique
-            discovered.sort((a,b) => elementsDB[a].name.localeCompare(elementsDB[b].name));
-            
-            discovered.forEach(key => {
+            discovered.sort().forEach(key => {
+                if(!elementsDB[key]) return;
                 const data = elementsDB[key];
-                if(!data) return;
-                
                 const div = document.createElement('div');
                 div.className = 'element-source';
                 div.innerHTML = `<div>${data.icon}</div><span>${data.name}</span>`;
@@ -317,6 +278,8 @@
 
         function spawnElement(key, x, y, autoDrag = false) {
             const data = elementsDB[key];
+            if (!data) return; // Protection contre les éléments inconnus
+
             const el = document.createElement('div');
             el.className = 'element';
             el.innerHTML = `<div>${data.icon}</div><span>${data.name}</span>`;
@@ -324,11 +287,8 @@
             el.dataset.type = key;
             el.style.left = (x - 40) + 'px';
             el.style.top = (y - 40) + 'px';
-            
             workspaceEl.appendChild(el);
-            
             if(autoDrag) startDrag(el, x, y);
-
             el.addEventListener('mousedown', (e) => startDrag(el, e.clientX, e.clientY));
         }
 
@@ -369,7 +329,6 @@
                 droppedEl.remove();
                 return;
             }
-
             checkFusion(droppedEl);
         });
 
@@ -393,6 +352,12 @@
                     );
 
                     if (recipe) {
+                        // VÉRIFICATION CRITIQUE : Est-ce que le résultat existe dans la DB ?
+                        if (!elementsDB[recipe.result]) {
+                            console.error("Erreur: Recette trouvée mais résultat inconnu:", recipe.result);
+                            return; 
+                        }
+
                         createParticles(c2.x, c2.y, "#f6e05e");
                         el1.remove();
                         el2.remove();
@@ -401,7 +366,8 @@
                         if (!discovered.includes(recipe.result)) {
                             discovered.push(recipe.result);
                             renderSidebar();
-                            workspaceEl.lastChild.classList.add('new-discovery');
+                            const newEl = workspaceEl.lastChild;
+                            if(newEl) newEl.classList.add('new-discovery');
                         }
                         break; 
                     }
@@ -421,12 +387,15 @@
                 p.style.borderRadius = '50%';
                 p.style.pointerEvents = 'none';
                 document.body.appendChild(p);
+                
                 const angle = Math.random() * Math.PI * 2;
                 const velocity = Math.random() * 50 + 20;
+                
                 const anim = p.animate([
                     { transform: `translate(0,0) scale(1)`, opacity: 1 },
                     { transform: `translate(${Math.cos(angle)*velocity}px, ${Math.sin(angle)*velocity}px) scale(0)`, opacity: 0 }
                 ], { duration: 600, easing: 'ease-out' });
+                
                 anim.onfinish = () => p.remove();
             }
         }
